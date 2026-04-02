@@ -9,6 +9,9 @@ quoteComponent.forEach((component) => {
     : undefined;
   const gap = component.dataset.gap ? Number(component.dataset.gap) : undefined;
 
+  const autoplay =
+    component.dataset.autoplay === "false" ? false : { delay: 5000 };
+
   const swiper = new Swiper(component, {
     direction: "horizontal",
     loop: false,
@@ -18,9 +21,7 @@ quoteComponent.forEach((component) => {
       nextEl: '[data-quote-slider-nav="next"]',
       prevEl: '[data-quote-slider-nav="prev"]',
     },
-    autoplay: {
-      delay: 5000,
-    },
+    autoplay,
     mousewheel: {
       enabled: true,
       forceToAxis: true,

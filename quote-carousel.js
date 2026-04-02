@@ -14,6 +14,10 @@ quoteComponent.forEach((component) => {
     loop: false,
     slidesPerView: perViewMobile ?? 1.25,
     spaceBetween: gap ?? 120,
+    navigation: {
+      nextEl: '[data-quote-slider-nav="next"]',
+      prevEl: '[data-quote-slider-nav="prev"]',
+    },
     autoplay: {
       delay: 5000,
     },

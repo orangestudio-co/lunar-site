@@ -7,12 +7,13 @@ quoteComponent.forEach((component) => {
   const perViewMobile = component.dataset.perViewMobile
     ? Number(component.dataset.perViewMobile)
     : undefined;
+  const gap = component.dataset.gap ? Number(component.dataset.gap) : undefined;
 
   const swiper = new Swiper(component, {
     direction: "horizontal",
     loop: false,
     slidesPerView: perViewMobile ?? 1.25,
-    spaceBetween: 24,
+    spaceBetween: gap ?? 120,
     autoplay: {
       delay: 5000,
     },

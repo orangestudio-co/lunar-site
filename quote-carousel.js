@@ -22,11 +22,6 @@ quoteComponent.forEach((component) => {
       prevEl: '[data-quote-slider-nav="prev"]',
     },
     autoplay,
-    mousewheel: {
-      enabled: true,
-      forceToAxis: true,
-      sensitivity: 50,
-    },
     breakpoints: {
       768: {
         slidesPerView: perView ?? 1.25,

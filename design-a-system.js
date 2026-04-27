@@ -1,85 +1,243 @@
-let redirectUrl = "/thank-you";
+ const step1 = document.querySelector("[data-form-step='1']");
+  const step2 = document.querySelector("[data-form-step='2']");
+  const step3 = document.querySelector("[data-form-step='3']");
 
-async function initPartner() {
-  const params = new URLSearchParams(window.location.search);
-  const partner = params.get("partner");
-  const cookieName = "partner";
+  // === Google Maps Script Loading ===
+  var script = document.createElement('script');
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDgQwK9IikV6SubEN0XyKTdC3gHB52CEk0&libraries=places&callback=initAutocomplete';
+  script.async = true;
 
-  if (partner) {
-    const existing = await cookieStore.get(cookieName);
+  let autocomplete;
+  let validPlace = null;
 
-    if (!existing) {
-      const time = 3 * 31 * 24 * 60 * 60 * 1000;
-      try {
-        await cookieStore.set({
-          name: cookieName,
-          value: partner,
-          expires: Date.now() + time,
-        });
-      } catch (error) {
-        console.log(`Error setting ${cookieName}: ${error}`);
+  function initAutocomplete() {
+    const input = document.querySelector('#google-input');
+
+    autocomplete = new google.maps.places.Autocomplete(input, {
+      fields: ['address_components', 'geometry'],
+      types: ['address'],
+    });
+
+    autocomplete.addListener('place_changed', fillInAddress);
+
+    // Invalidate if the user edits the input after selecting
+    input.addEventListener('input', () => {
+      validPlace = null;
+    });
+  }
+
+  function fillInAddress() {
+    const place = autocomplete.getPlace();
+
+    // No valid selection
+    if (!place.address_components || !place.geometry) {
+      validPlace = null;
+      return;
+    }
+
+    // Parse address components
+    let streetNumber = '';
+    let route = '';
+    let city = '';
+    let state = '';
+    let stateLong = '';
+    let country = '';
+    let postcode = '';
+
+    for (const component of place.address_components) {
+      const type = component.types[0];
+
+      switch (type) {
+        case 'street_number':
+          streetNumber = component.long_name;
+          break;
+        case 'route':
+          route = component.long_name;
+          break;
+        case 'locality':
+          city = component.long_name;
+          break;
+        case 'administrative_area_level_1':
+          state = component.short_name;
+          stateLong = component.long_name;
+          break;
+        case 'country':
+          country = component.long_name;
+          break;
+        case 'postal_code':
+          postcode = component.long_name;
+          break;
+        case 'postal_code_suffix':
+          postcode += `-${component.long_name}`;
+          break;
       }
     }
+
+    // Build full street address
+    const streetAddress = streetNumber ? `${streetNumber} ${route}` : route;
+
+    // Get coordinates
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+
+    // Store parsed address
+    validPlace = {
+      streetAddress,
+      city,
+      state,
+      stateLong,
+      country,
+      postcode,
+      lat,
+      lng,
+    };
+
+    step1.style.display = 'none';
+    step2.style.display = 'flex';
   }
 
-  if (
-    window.location.pathname === "/design-a-system" &&
-    !params.has("partner")
-  ) {
-    const savedPartner = await cookieStore.get(cookieName);
-    if (savedPartner) {
-      window.location.href = `/design-a-system?partner=${savedPartner.value}`;
-    }
-  }
+  window.initAutocomplete = initAutocomplete;
+  document.head.appendChild(script);
 
-  const partnerCookie = await cookieStore.get(cookieName);
-  const partnerValue = partnerCookie?.value?.toLowerCase();
-
-  const partnerItems = document.querySelectorAll("[data-partner-item]");
-  partnerItems.forEach((item) => {
-    const itemPartner = item.dataset.partnerItem.toLowerCase();
-    if (itemPartner === partnerValue) {
-      // Page Modifications
-      const form = document.querySelector(
-        "#wf-form-Get-Pricing-Lead-Form-2024",
-      );
-      if (item.dataset.redirect) redirectUrl = item.dataset.redirect;
-      const paragraph = item.querySelector("[data-info='paragraph']");
-      const paragraphWrap = document.querySelector(
-        "[data-original='paragraph-wrap']",
-      );
-
-      paragraphWrap.querySelector("[data-original='paragraph']").remove();
-      paragraphWrap.append(paragraph);
-    }
+    const editAddress = document.querySelector("[data-button='edit-address']");
+  editAddress.addEventListener('click', function (event) {
+    step1.style.display = 'flex';
+    step2.style.display = 'none';
   });
-}
 
-initPartner();
+  const showForm = document.querySelector("[data-button='show']");
+  showForm.addEventListener('click', function (event) {
+    step2.style.display = 'none';
+    step3.style.display = 'flex';
+  });
 
-window.Webflow = window.Webflow || [];
+let redirectUrl = '/thank-you';
 
-Webflow.push(function () {
-  const $form = $("#wf-form-Get-Pricing-Lead-Form-2024"); // Use your form id
+  async function initPartner() {
+    const params = new URLSearchParams(window.location.search);
+    const partner = params.get('partner');
+    const cookieName = 'partner';
+    if (partner) {
+      const existing = await cookieStore.get(cookieName);
 
-  $form.on("submit", function () {
-    setTimeout(() => {
-      if ($form.css("display") === "none") {
-        window.location.href = redirectUrl;
-        return;
-      }
-
-      const observer = new MutationObserver(() => {
-        if ($form.css("display") === "none") {
-          observer.disconnect();
-          window.location.href = redirectUrl;
+      if (!existing) {
+        const time = 3 * 31 * 24 * 60 * 60 * 1000;
+        try {
+          await cookieStore.set({
+            name: cookieName,
+            value: partner,
+            expires: Date.now() + time,
+          });
+        } catch (error) {
+          console.log(`Error setting ${cookieName}: ${error}`);
         }
-      });
+      }
+    }
 
-      observer.observe($form[0], {
-        attributes: true,
-        attributeFilter: ["style", "class"],
-      });
-    }, 0);
+    if (!params.has('partner')) {
+      const savedPartner = await cookieStore.get(cookieName);
+      if (savedPartner) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('partner', savedPartner.value);
+        window.location.replace(url.toString());
+      }
+    }
+
+    const partnerCookie = await cookieStore.get(cookieName);
+    const partnerValue = partnerCookie?.value?.toLowerCase();
+    const partnerItems = document.querySelectorAll('[data-partner-item]');
+    partnerItems.forEach((item) => {
+      const itemPartner = item.dataset.partnerItem.toLowerCase();
+      if (itemPartner === partnerValue) {
+        if (item.dataset.redirect) redirectUrl = item.dataset.redirect;
+        const paragraph = item.querySelector("[data-info='paragraph']");
+        const paragraphWrap = document.querySelector("[data-original='paragraph-wrap']");
+
+        paragraphWrap.querySelector("[data-original='paragraph']").remove();
+        paragraphWrap.append(paragraph);
+      }
+    });
+  }
+
+  initPartner();
+
+  let hasSolar = 'No';
+
+  const solarButtons = document.querySelectorAll("[data-form='radio']");
+  solarButtons.forEach((btn) => {
+    btn.addEventListener('click', function (e) {
+      solarButtons.forEach((b) => b.classList.remove('is-active'));
+      e.currentTarget.classList.add('is-active');
+      hasSolar = e.currentTarget.textContent.trim();
+    });
   });
-});
+
+  // ─── HubSpot Config ───────────────────────────────────────────────────────────
+  const HUBSPOT_PORTAL_ID = '47780539';
+  const HUBSPOT_FORM_ID = 'ffdc1c63-0eff-4515-ac13-85c5ff93e15b';
+
+  // ─── Form Field Selectors → HubSpot Field Names ───────────────────────────────
+  // Add or remove entries to match your inputs and HubSpot field names
+  const FIELD_MAP = [
+    { selector: '#email', name: 'email' },
+    { selector: '#phone', name: 'phone' },
+    { selector: '#first-name', name: 'firstname' },
+    { selector: '#last-name', name: 'lastname' },
+  ];
+
+  // ─── Form Selector ────────────────────────────────────────────────────────────
+  const FORM_SELECTOR = '#info-form';
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  async function submitHubSpotForm(fields) {
+    const response = await fetch(`https://api.hsforms.com/submissions/v3/integration/submit/${HUBSPOT_PORTAL_ID}/${HUBSPOT_FORM_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields,
+        context: {
+          pageUri: window.location.href,
+          pageName: document.title,
+        },
+      }),
+    });
+
+    return response.json();
+  }
+
+  document.querySelector(FORM_SELECTOR)?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!e.target.checkValidity()) {
+      e.target.reportValidity();
+      return;
+    }
+
+    const fields = FIELD_MAP.map(({ selector, name }) => ({
+      name,
+      value: document.querySelector(selector)?.value ?? '',
+    }));
+
+    if (validPlace) {
+      fields.push({ name: 'address', value: validPlace.streetAddress }, { name: 'city', value: validPlace.city }, { name: 'state', value: validPlace.state }, { name: 'zip', value: validPlace.postcode }, { name: 'country', value: validPlace.country });
+    }
+
+    fields.push({ name: 'has__solar', value: hasSolar });
+
+    const partnerParam = new URLSearchParams(window.location.search).get('partner');
+    if (partnerParam) {
+      const partner = partnerParam.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      fields.push({ name: 'design_a_system_partner', value: partner });
+    }
+
+    try {
+      const data = await submitHubSpotForm(fields);
+      if (!data.errors) {
+        window.location.href = redirectUrl;
+      } else {
+        console.error('HubSpot errors:', data.errors);
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+    }
+  });

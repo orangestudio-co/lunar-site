@@ -37,7 +37,7 @@ async function initPartner() {
   partnerItems.forEach((item) => {
     const itemPartner = item.dataset.partnerItem.toLowerCase();
     if (itemPartner === partnerValue) {
-      if (item.dataset.redirect) redirectUrl = item.dataset.redirect;
+      if (item.dataset.redirect) redirectUrl = `/thank-you/${item.dataset.redirect}`;
       const paragraph = item.querySelector("[data-info='paragraph']");
       const paragraphWrap = document.querySelector("[data-original='paragraph-wrap']");
 
@@ -243,6 +243,7 @@ document.querySelector(FORM_SELECTOR)?.addEventListener('submit', async (e) => {
   }
 
   fields.push({ name: 'has__solar', value: hasSolar });
+  fields.push({ name: 'has_booked_meeting', value: 'false' });
 
   const partnerParam = new URLSearchParams(window.location.search).get('partner');
   if (partnerParam) {

@@ -253,7 +253,12 @@ document.querySelector(FORM_SELECTOR)?.addEventListener('submit', async (e) => {
   try {
     const data = await submitHubSpotForm(fields);
     if (!data.errors) {
-      window.location.href = redirectUrl;
+      const redirectParams = new URLSearchParams({
+        firstname: document.querySelector('#first-name')?.value ?? '',
+        lastname: document.querySelector('#last-name')?.value ?? '',
+        email: document.querySelector('#email')?.value ?? '',
+      });
+      window.location.href = `${redirectUrl}?${redirectParams}`;
     } else {
       console.error('HubSpot errors:', data.errors);
     }

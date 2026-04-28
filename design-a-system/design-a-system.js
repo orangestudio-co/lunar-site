@@ -1,26 +1,11 @@
 // === Partner / URL Params ===
 let redirectUrl = '/thank-you';
+let validPartner = null;
 
 async function initPartner() {
   const params = new URLSearchParams(window.location.search);
   const partner = params.get('partner');
   const cookieName = 'partner';
-
-  if (partner) {
-    const existing = await cookieStore.get(cookieName);
-    if (!existing || existing.value !== partner) {
-      const time = 3 * 31 * 24 * 60 * 60 * 1000;
-      try {
-        await cookieStore.set({
-          name: cookieName,
-          value: partner,
-          expires: Date.now() + time,
-        });
-      } catch (error) {
-        console.log(`Error setting ${cookieName}: ${error}`);
-      }
-    }
-  }
 
   if (!params.has('partner')) {
     const savedPartner = await cookieStore.get(cookieName);
@@ -31,18 +16,38 @@ async function initPartner() {
     }
   }
 
-  const partnerCookie = await cookieStore.get(cookieName);
-  const partnerValue = partnerCookie?.value?.toLowerCase();
   const partnerItems = document.querySelectorAll('[data-partner-item]');
-  partnerItems.forEach((item) => {
+  partnerItems.forEach(async (item) => {
     const itemPartner = item.dataset.partnerItem.toLowerCase();
-    if (itemPartner === partnerValue) {
-      if (item.dataset.redirect) redirectUrl = `/thank-you/${item.dataset.redirect}`;
-      const paragraph = item.querySelector("[data-info='paragraph']");
-      const paragraphWrap = document.querySelector("[data-original='paragraph-wrap']");
+    if (itemPartner === partner?.toLowerCase()) {
+      const existing = await cookieStore.get(cookieName);
+      if (!existing || existing.value !== partner) {
+        const time = 3 * 31 * 24 * 60 * 60 * 1000;
+        try {
+          await cookieStore.set({
+            name: cookieName,
+            value: partner,
+            expires: Date.now() + time,
+          });
+        } catch (error) {
+          console.log(`Error setting ${cookieName}: ${error}`);
+        }
+      }
+      redirectUrl = `/thank-you/${item.dataset.partnerItem}`;
+      validPartner = item.dataset.partnerItem;
+      const introParagraph = item.querySelector("[data-info='intro-paragraph']");
+      const introParagraphWrap = document.querySelector("[data-original='intro-wrap']");
+      if (introParagraph && introParagraphWrap) {
+        introParagraphWrap.querySelector("[data-original='intro']")?.remove();
+        introParagraphWrap.append(introParagraph);
+      }
 
-      paragraphWrap.querySelector("[data-original='paragraph']").remove();
-      paragraphWrap.append(paragraph);
+      const designParagraph = item.querySelector("[data-info='design-paragraph']");
+      const designParagraphWrap = document.querySelector("[data-original='design-wrap']");
+      if (designParagraph && designParagraphWrap) {
+        designParagraphWrap.querySelector("[data-original='design']")?.remove();
+        designParagraphWrap.append(designParagraph);
+      }
 
       const logoUrl = item.querySelector("[data-info='logo-url']")?.src;
       if (logoUrl) {
@@ -245,9 +250,8 @@ document.querySelector(FORM_SELECTOR)?.addEventListener('submit', async (e) => {
   fields.push({ name: 'has__solar', value: hasSolar });
   fields.push({ name: 'has_booked_meeting', value: 'false' });
 
-  const partnerParam = new URLSearchParams(window.location.search).get('partner');
-  if (partnerParam) {
-    const partner = partnerParam.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  if (validPartner) {
+    const partner = validPartner.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     fields.push({ name: 'design_a_system_partner', value: partner });
   }
 

@@ -90,8 +90,10 @@ function showStep(n) {
   const videoEl = document.querySelector('[data-visual="video"]');
   const systemEl = document.querySelector('[data-visual="system"]');
   const landerContent = document.querySelector('[data-lander="content"]');
-  if (videoEl) videoEl.style.display = isStep3 ? "none" : "block";
-  if (systemEl) systemEl.style.display = isStep3 ? "block" : "none";
+  if (!validPartner) {
+    if (videoEl) videoEl.style.display = isStep3 ? "none" : "block";
+    if (systemEl) systemEl.style.display = isStep3 ? "block" : "none";
+  }
   if (landerContent) landerContent.style.display = isStep3 ? "none" : "block";
 }
 

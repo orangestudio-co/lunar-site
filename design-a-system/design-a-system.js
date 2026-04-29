@@ -39,6 +39,15 @@ async function initPartner() {
       if (showBtn) showBtn.textContent = "Continue";
       const billField = document.querySelector("[data-field='bill']");
       if (billField) billField.style.display = "none";
+      const phoneField = document.querySelector("[data-phone='field']");
+      if (phoneField) phoneField.required = true;
+      const phoneLabel = document.querySelector("[data-phone='label']");
+      if (phoneLabel) {
+        const star = document.createElement("span");
+        star.className = "star";
+        star.textContent = "*";
+        phoneLabel.appendChild(star);
+      }
       const introParagraph = item.querySelector(
         "[data-info='intro-paragraph']",
       );

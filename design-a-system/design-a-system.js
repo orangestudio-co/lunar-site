@@ -35,6 +35,8 @@ async function initPartner() {
       }
       redirectUrl = `/thank-you/${item.dataset.partnerItem}`;
       validPartner = item.dataset.partnerItem;
+      const showBtn = document.querySelector("[data-button='show']");
+      if (showBtn) showBtn.textContent = "Continue";
       const introParagraph = item.querySelector(
         "[data-info='intro-paragraph']",
       );

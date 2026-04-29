@@ -7,6 +7,14 @@ async function initPartner() {
   const partner = params.get("partner");
   const cookieName = "partner";
 
+  if (partner?.toLowerCase() === "clear") {
+    await cookieStore.delete(cookieName);
+    const clearUrl = new URL(window.location.href);
+    clearUrl.searchParams.delete("partner");
+    window.location.replace(clearUrl.toString());
+    return;
+  }
+
   if (!params.has("partner")) {
     const savedPartner = await cookieStore.get(cookieName);
     if (savedPartner) {

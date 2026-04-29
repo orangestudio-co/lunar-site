@@ -39,6 +39,8 @@ async function initPartner() {
       if (showBtn) showBtn.textContent = "Continue";
       const billField = document.querySelector("[data-field='bill']");
       if (billField) billField.style.display = "none";
+      const nextStepsEl = document.querySelector("[data-text-element='next-steps']");
+      if (nextStepsEl?.dataset.text) nextStepsEl.textContent = nextStepsEl.dataset.text;
       const phoneField = document.querySelector("[data-phone='field']");
       if (phoneField) phoneField.required = true;
       const phoneLabel = document.querySelector("[data-phone='label']");

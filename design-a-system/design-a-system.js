@@ -37,6 +37,8 @@ async function initPartner() {
       validPartner = item.dataset.partnerItem;
       const showBtn = document.querySelector("[data-button='show']");
       if (showBtn) showBtn.textContent = "Continue";
+      const billField = document.querySelector("[data-field='bill']");
+      if (billField) billField.style.display = "none";
       const introParagraph = item.querySelector(
         "[data-info='intro-paragraph']",
       );

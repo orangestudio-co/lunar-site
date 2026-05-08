@@ -17,8 +17,8 @@ quoteComponent.forEach((component) => {
   const swiper = new Swiper(component, {
     direction: "horizontal",
     loop: false,
-    slidesPerView: perViewMobile ?? 1.25,
-    spaceBetween: gap ?? 120,
+    slidesPerView: isFade ? 1 : (perViewMobile ?? 1.25),
+    spaceBetween: isFade ? 0 : (gap ?? 120),
     ...(isFade && {
       effect: "fade",
       fadeEffect: { crossFade: true },
@@ -28,7 +28,7 @@ quoteComponent.forEach((component) => {
       prevEl: '[data-quote-slider-nav="prev"]',
     },
     autoplay,
-    breakpoints: {
+    breakpoints: isFade ? {} : {
       768: {
         slidesPerView: perView ?? 1.25,
       },

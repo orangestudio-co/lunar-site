@@ -12,11 +12,17 @@ quoteComponent.forEach((component) => {
   const autoplay =
     component.dataset.autoplay === "false" ? false : { delay: 5000 };
 
+  const isFade = component.dataset.effect === "fade";
+
   const swiper = new Swiper(component, {
     direction: "horizontal",
     loop: false,
     slidesPerView: perViewMobile ?? 1.25,
     spaceBetween: gap ?? 120,
+    ...(isFade && {
+      effect: "fade",
+      fadeEffect: { crossFade: true },
+    }),
     navigation: {
       nextEl: '[data-quote-slider-nav="next"]',
       prevEl: '[data-quote-slider-nav="prev"]',

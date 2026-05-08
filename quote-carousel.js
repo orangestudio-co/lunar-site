@@ -21,7 +21,7 @@ quoteComponent.forEach((component) => {
     spaceBetween: isFade ? 0 : (gap ?? 120),
     ...(isFade && {
       effect: "fade",
-      fadeEffect: { crossFade: true },
+      centeredSlides: true,
     }),
     navigation: {
       nextEl: '[data-quote-slider-nav="next"]',

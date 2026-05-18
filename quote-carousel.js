@@ -14,6 +14,25 @@ quoteComponent.forEach((component) => {
 
   const isFade = component.dataset.effect === "fade";
 
+  const navContainer = component.nextElementSibling;
+  const nextEl = navContainer
+    ? navContainer.querySelector('[data-quote-slider-nav="next"]')
+    : null;
+  const prevEl = navContainer
+    ? navContainer.querySelector('[data-quote-slider-nav="prev"]')
+    : null;
+
+  const totalSlides = component.querySelectorAll(".swiper-slide").length;
+
+  const updateNavVisibility = (swiper) => {
+    if (!navContainer) return;
+    const currentPerView = swiper.params.slidesPerView;
+    navContainer.style.display =
+      typeof currentPerView === "number" && currentPerView >= totalSlides
+        ? "none"
+        : "";
+  };
+
   const swiper = new Swiper(component, {
     direction: "horizontal",
     loop: false,
@@ -24,14 +43,18 @@ quoteComponent.forEach((component) => {
       centeredSlides: true,
     }),
     navigation: {
-      nextEl: '[data-quote-slider-nav="next"]',
-      prevEl: '[data-quote-slider-nav="prev"]',
+      nextEl,
+      prevEl,
     },
     autoplay,
     breakpoints: isFade ? {} : {
       768: {
         slidesPerView: perView ?? 1.25,
       },
+    },
+    on: {
+      init: updateNavVisibility,
+      breakpoint: updateNavVisibility,
     },
   });
 });
